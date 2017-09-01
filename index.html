@@ -1,159 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <script type="text/javascript" src="lib/knockout-3.4.2.js"></script>
-
-  <link href="https://fonts.googleapis.com/css?family=Trade+Winds" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-  <link href="css/styles.css" rel="stylesheet" type="text/css">
-
-  <title>Explore the East Fork Lewis River</title>
+	<title>Neighborhood Map Project</title>
+	<style>
+		#map {
+			width: 400px;
+			height: 400px;
+		}
+	</style>
 </head>
 <body>
 
-  <header class="site-header">
-    <h1 class="site-h1">Explore the East Fork Lewis&nbsp;River</h1>
 
-    <form class="map-filters">
-      <label class="boat-ramp"><input type="checkbox">Boat Ramp</label>
-      <label class="camping"><input type="checkbox">Camping</label>
-      <label class="hiking"><input type="checkbox">Hiking</label>
-      <label class="kayak"><input type="checkbox">Kayak/Canoe Access</label>
-      <label class="restrooms"><input type="checkbox">Restrooms</label>
-      <label class="fees-required"><input type="checkbox">Fees Required</label>
+		<!-- filter controls -->
 
+		<div data-bind="foreach: categories">
 
-    </form>
+		  	<input type="checkbox" data-bind="checked: $root.selectedCategories, checkedValue: $data, attr: {id: $data}, click: $root.filterLocations">
+				<label data-bind="text: $data, attr: {for: $data}"></label>
+
+		 </div>
 
 
-  </header>
-  <div id="map"></div>
+		<!-- list of locations -->
+		<ul data-bind="foreach: visibleLocations">
+			<li data-bind="text: $data"></li>
+	</ul>
 
-  <script>
-
-  var map;
-
-  // Create a new blank array for all the listing markers.
-  var markers = [];
+		<div id="map"></div>
 
 
-  function initMap() {
-          // Make Map
-          var map = new google.maps.Map(document.getElementById('map'), {
-            styles:
-              [{"featureType":"landscape","stylers":[{"hue":"#FFBB00"},{"saturation":43.400000000000006},{"lightness":37.599999999999994},{"gamma":1}]},{"featureType":"road.highway","stylers":[{"hue":"#FFC200"},{"saturation":-61.8},{"lightness":45.599999999999994},{"gamma":1}]},{"featureType":"road.arterial","stylers":[{"hue":"#FF0300"},{"saturation":-100},{"lightness":51.19999999999999},{"gamma":1}]},{"featureType":"road.local","stylers":[{"hue":"#FF0300"},{"saturation":-100},{"lightness":52},{"gamma":1}]},{"featureType":"water","stylers":[{"hue":"#0078FF"},{"saturation":-13.200000000000003},{"lightness":2.4000000000000057},{"gamma":1}]},{"featureType":"poi","stylers":[{"hue":"#00FF6A"},{"saturation":-1.0989010989011234},{"lightness":11.200000000000017},{"gamma":1}]}],
-              mapTypeControlOptions: {
-             style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-             position: google.maps.ControlPosition.TOP_CENTER
-         }
-          });
-
-          // Locations
-          var locations = [
-            {title: 'Lewisville Park', location: {lat: 45.816459, lng: -122.541811}, services: ["Boat Ramp", "Hiking", "Kayak/Canoe Access", "Restrooms"], fees: true},
-            {title: 'Paradise Point State Park', location: {lat: 45.865752, lng: -122.703986}, services: ["Boat Ramp", "Hiking", "Kayak/Canoe Access", "Restrooms"], fees:  true},
-            {title: 'Daybreak Park', location: {lat: 45.813480, lng: -122.588698}, services: ["Boat Ramp", "Kayak/Canoe Access", "Restrooms"], fees: false},
-            {title: 'Sunset Falls Campground', location: {lat: 45.819102, lng: -122.252303}, services: ["Kayak/Canoe Access", "Restrooms", "Camping"], fees: true},
-            {title: 'Moulton Falls Regional Park', location: {lat: 45.831679, lng: -122.389088}, services: ["Hiking", "Restrooms"], fees: false},
-            {title: 'Kayak/Canoe Launch', location: {lat: 45.821464, lng: -122.236941}, services: ["Kayak/Canoe Access"],  description: "This is a popular put-in for the waterfall run. There is a small pull out here for parking. Follow the trail to the river. It is a steep climb down to the river.", fees: false},
-            {title: 'Kayak/Canoe Launch', location: {lat: 45.830943, lng: -122.212046}, services: ["Kayak/Canoe Access"], description: "This put-in for the waterfall run is suitable when river level is 1,500 cfs or higher.", fees: false}
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
 
 
-          ];
-
-          var infowindow = new google.maps.InfoWindow();
-
-          // Create markers
-          for (var i = 0; i < locations.length; i++) {
-            // Get the position and title from the location array.
-            var position = locations[i].location;
-            var title = locations[i].title;
-
-            // If the description is blank, set it to an empty string
-            if ( locations[i].description === undefined) {
-              var description = "";
-            } else {
-              var description = locations[i].description;
-            }
-
-            var services = locations[i].services;
-
-            var fees = locations[i].fees;
+		<script src="app.js"></script>
 
 
-            // Create a marker for each location and put it in the markers array.
-            var marker = new google.maps.Marker({
-              map: map,
-              position: position,
-              title: title,
-              animation: google.maps.Animation.DROP,
-              id: i,
-              description: description,
-              services: services,
-              fees: fees
-            });
+	<!-- Load google maps API
+		 https://developers.google.com/maps/documentation/javascript/examples/map-simple -->
 
-            // Push the marker to our array of markers.
-            markers.push(marker);
+		 <script async defer
+		 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmrqvE0MCXgLXc_ILYaRbdPOK1Pz_ApnE&callback=initMap">
+		 </script>
 
-            // Create and onclick event to open an infowindow at each marker.
-            marker.addListener('click', function() {
-              populateInfoWindow(this, infowindow);
-            });
-          }
-
-
-          // Set Bounds
-          var swBounds = new google.maps.LatLng(45.822883, -122.719666);
-          var neBounds = new google.maps.LatLng(45.866361, -122.163878);
-          var bounds = new google.maps.LatLngBounds();
-          bounds.extend(swBounds);
-          bounds.extend(neBounds);
-          map.fitBounds(bounds);
-
-        } // end initMap
-
-
-        // This function populates the infowindow when the marker is clicked. We'll only allow
-        // one infowindow which will open at the marker that is clicked, and populate based
-        // on that markers position.
-        function populateInfoWindow(marker, infowindow) {
-
-
-
-          // Check to make sure the infowindow is not already opened on this marker.
-          if (infowindow.marker != marker) {
-            infowindow.marker = marker;
-
-
-            // Add items from the service array to an HTML list.
-            var serviceList = "";
-            for (i = 0; i < marker.services.length; i++) {
-            var serviceItem = marker.services[i];
-
-            // Create the CSS class name from the service name. Replace spaces and forward slashes with hyphens.
-            var serviceItemClass = serviceItem.replace(/\s|\//g, "-").toLowerCase();
-            serviceList =  serviceList + '<li class='+ serviceItemClass + '>' + serviceItem + '</li>';
-            }
-
-            if (marker.fees === true) {
-              serviceList = serviceList + '<li class=\"fees-required\">Fees Required</li>';
-            }
-
-            infowindow.setContent('<div class="info-window"><h3>' + marker.title + '</h3>' + '<p>' + marker.description + '</p><ul class="info-window-services">' + serviceList + '</ul></div>');
-            infowindow.open(map, marker);
-            // Make sure the marker property is cleared if the infowindow is closed.
-            infowindow.addListener('closeclick',function(){
-              infowindow.setMarker = null;
-            });
-          }
-        }
-      </script>
-      <script async defer
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmrqvE0MCXgLXc_ILYaRbdPOK1Pz_ApnE&callback=initMap">
-      </script>
 </body>
 </html>
