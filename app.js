@@ -178,8 +178,7 @@ var AppViewModel = function (){
 } // end of AppViewModel
 
 // USGS Instantaneous Values Web Service
-
-var usgsURL =  "https://waterservices.usgs.gov/nwis/iv/?fomat=json&sites=14222500&parameterCd=00060&siteStatus=all";
+var usgsURL =  "https:\/\/waterservices.usgs.gov/nwis/iv/?format=json&indent=on&sites=14222500&parameterCd=00060&siteStatus=all";
 
 var riverFlowMessage;
 
@@ -197,7 +196,7 @@ $.getJSON(usgsURL, function (data){
     riverFlowStatus = "high";
   };
 
-  riverFlowMessage = "Current Flow: " + currentRiverFlow + "cfs" + " &bull; <span>" + riverFlowStatus + "</span>";
+  riverFlowMessage = "Current Flow: " + currentRiverFlow + " cfs" + " &bull; <span>" + riverFlowStatus + "</span>";
 
   makeRiverFlowMessage();
 
