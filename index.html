@@ -23,7 +23,7 @@
 
 		<!-- list of locations -->
 		<ul data-bind="foreach: visibleLocations">
-			<li data-bind="text: $data.title, click: triggerMarker()"</li>
+			<li data-bind="text: $data.title, click: function(data, event) { highlightMarker(data, event, $index()) }"</li>
 	</ul>
 
 		<!-- current river flow -->

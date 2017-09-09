@@ -83,13 +83,18 @@ function initMap() {
             id: location.title,
             description: description,
             services: services,
-            fees: fees
+            fees: fees,
+            icon: "http:\/\/maps.google.com/mapfiles/ms/icons/red-dot.png"
           });
 
           markers.push(marker);
 
           // Create an onclick event listener to open an infowindow at each marker.
           marker.addListener('click', function() {
+            markers.forEach(function(marker){
+              marker.setIcon("http:\/\/maps.google.com/mapfiles/ms/icons/red-dot.png");
+            });
+            this.setIcon("http:\/\/maps.google.com/mapfiles/ms/icons/blue-dot.png")
             populateInfoWindow(this, infowindow);
           });
 
@@ -120,6 +125,7 @@ function initMap() {
 
           infowindow.setContent('<div class="info-window"><h3>' + marker.title + '</h3>' + '<p>' + marker.description + '</p><ul class="info-window-services">' + serviceList + '</ul></div>');
           infowindow.open(map, marker);
+
           // Make sure the marker property is cleared if the infowindow is closed.
           infowindow.addListener('closeclick',function(){
             infowindow.setMarker = null;
@@ -127,11 +133,13 @@ function initMap() {
         }
       }
 
-      // Trigger maker when corresponding list item is clicked
-      function triggerMarker(){
-        console.log("you are calling a function outside of the view model");
-        // google.maps.event.trigger(markers[id], 'click');
-      }
+var highlightMarker = function(data, event, index){
+
+  var selectedMarker = markers[index];
+  google.maps.event.trigger(markers[index], 'click');
+};
+
+
 
 var AppViewModel = function (){
   var self = this;
