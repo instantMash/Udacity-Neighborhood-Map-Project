@@ -264,6 +264,8 @@ var highlightMarker = function(data, event, index) {
 var AppViewModel = function() {
     var self = this;
 
+    this.riverFlowMessage = ko.observable();
+
     this.selectedCategories = ko.observableArray();
 
     this.visibleLocations = ko.observableArray();
@@ -328,24 +330,15 @@ $.getJSON(usgsURL, function(data) {
             riverFlowStatus = "high";
         }
 
-        riverFlowMessage = "Current Flow: " + currentRiverFlow + " cfs" + " &bull; <span>" + riverFlowStatus + "</span><br>" + riverFlowCredits;
+        vm.riverFlowMessage("<h3>Current Flow: " + currentRiverFlow + " cfs" + " &bull; <span>" + riverFlowStatus + "</span></h3>" + riverFlowCredits);
 
-        makeRiverFlowMessage();
     })
 
     .fail(function() {
 
-        riverFlowMessage = "Check out the latest river flow <a href=\"https:\/\/waterdata.usgs.gov\/wa\/nwis\/uv\/?site_no=14222500&PARAmeter_cd=00060,00065\">here</a>";
-
-        makeRiverFlowMessage();
+        vm.riverFlowMessage("Check out the latest river flow <a href=\"https:\/\/waterdata.usgs.gov\/wa\/nwis\/uv\/?site_no=14222500&PARAmeter_cd=00060,00065\">here</a>");
 
     });
-
-var makeRiverFlowMessage = function() {
-
-    $("#currentFlow").append(riverFlowMessage);
-
-};
 
 
 var vm = new AppViewModel();
