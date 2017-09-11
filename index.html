@@ -1,45 +1,46 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<title>Neighborhood Map Project</title>
-	<style>
-		#map {
-			width: 400px;
-			height: 400px;
-		}
-	</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Neighborhood Map Project</title>
+    <style>
+        #map {
+            width: 400px;
+            height: 400px;
+        }
+    </style>
 </head>
+
 <body>
 
+    <!-- filter controls -->
+    <div data-bind="foreach: categories">
 
-		<!-- filter controls -->
-		<div data-bind="foreach: categories">
+        <input type="checkbox" data-bind="checked: $root.selectedCategories, checkedValue: $data, attr: {id: $data}, click: $root.filterLocations">
+        <label data-bind="text: $data, attr: {for: $data}"></label>
 
-		  	<input type="checkbox" data-bind="checked: $root.selectedCategories, checkedValue: $data, attr: {id: $data}, click: $root.filterLocations">
-				<label data-bind="text: $data, attr: {for: $data}"></label>
+    </div>
 
-		 </div>
+    <!-- list of locations -->
+    <ul data-bind="foreach: visibleLocations">
+        <li data-bind="text: $data.title, click: function(data, event) { highlightMarker(data, event, $index()) }"></li>
+    </ul>
 
+    <!-- current river flow -->
+    <div data-bind="html: riverFlowMessage"></div>
 
-		<!-- list of locations -->
-		<ul data-bind="foreach: visibleLocations">
-			<li data-bind="text: $data.title, click: function(data, event) { highlightMarker(data, event, $index()) }"</li>
-	</ul>
+    <div id="map"></div>
 
-		<!-- current river flow -->
-		<p id="currentFlow"></p>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
 
-		<div id="map"></div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
-
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
-
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
-		 <script
-		 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmrqvE0MCXgLXc_ILYaRbdPOK1Pz_ApnE&callback">
-		 </script>
-		 <script src="app.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmrqvE0MCXgLXc_ILYaRbdPOK1Pz_ApnE&callback">
+    </script>
+    <script src="app.js"></script>
 
 </body>
+
 </html>
