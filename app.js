@@ -4,8 +4,7 @@ var locations = [{
             lat: 45.816459,
             lng: -122.541811
         },
-        services: ["Boat Ramp", "Hiking", "Kayak/Canoe Access", "Restrooms", "Fees Required"],
-        fees: true
+        services: ["Boat Ramp", "Hiking", "Swimming", "Kayak/Canoe Access", "Fees Required"]
     },
     {
         title: "Paradise Point State Park",
@@ -13,65 +12,42 @@ var locations = [{
             lat: 45.865752,
             lng: -122.703986
         },
-        services: ["Boat Ramp", "Hiking", "Kayak/Canoe Access", "Restrooms", "Fees Required"],
-        fees: true
+        services: ["Boat Ramp", "Hiking", "Swimming", "Kayak/Canoe Access", "Fees Required"]
     },
     {
-        title: "Daybreak Park",
+        title: "Battle Ground Lake State Park",
         location: {
-            lat: 45.813480,
-            lng: -122.588698
+            lat: 45.802789,
+            lng: -122.487089
         },
-        services: ["Boat Ramp", "Kayak/Canoe Access", "Restrooms"],
-        fees: false
+        services: ["Hiking", "Swimming", "Kayak/Canoe Access", "Fees Required"]
     },
     {
-        title: "Sunset Falls Campground",
+        title: "La Center",
         location: {
-            lat: 45.819102,
-            lng: -122.252303
+            lat: 45.812618,
+            lng: -122.546800
         },
-        services: ["Kayak/Canoe Access", "Restrooms", "Camping", "Fees Required"],
-        fees: true
+        services: ["Gas Stations", "Food"]
     },
     {
-        title: "Moulton Falls Regional Park",
+        title: "Battle Ground",
         location: {
-            lat: 45.831679,
-            lng: -122.389088
+            lat: 45.780700,
+            lng: -122.534362
         },
-        services: ["Hiking", "Restrooms"],
-        fees: false
-    },
-    {
-        title: "Kayak/Canoe Launch 1",
-        location: {
-            lat: 45.821464,
-            lng: -122.236941
-        },
-        services: ["Kayak/Canoe Access"],
-        description: "This is a popular put-in for the waterfall run. There is a small pull out here for parking. Follow the trail to the river. It is a steep climb down to the river.",
-        fees: false
-    },
-    {
-        title: "Kayak/Canoe Launch 2",
-        location: {
-            lat: 45.830943,
-            lng: -122.212046
-        },
-        services: ["Kayak/Canoe Access"],
-        description: "This put-in for the waterfall run is suitable when river level is 1,500 cfs or higher.",
-        fees: false
+        services: ["Gas Stations", "Food"]
     }
 ];
 
 var categories = [
-    "Boat Ramp",
-    "Camping",
-    "Hiking",
-    "Kayak/Canoe Access",
-    "Restrooms",
-    "Fees Required"
+  "Hiking",
+  "Boat Ramp",
+  "Fees Required",
+  "Swimming",
+  "Kayak/Canoe Access",
+  "Gas Stations",
+  "Food"
 ];
 
 // This utility function pushes all the location titles into the visible locations array. We call this at when none of the checkboxes are selected. For some reason, I was not able to simply assign the visibleLocations array to a variable that contained all the location titles. I have to actually push all the location titles each time. I think this has something to do with Knockout and how observable Arrays work.
@@ -186,14 +162,8 @@ var makeMarkers = function() {
     vm.visibleLocations().forEach(function(location) {
         var title = location.title;
         var position = location.location;
-        var description = location.description;
         var services = location.services;
         var fees = location.fees;
-
-        // If the description is blank, set it to an empty string. This prevents "undefined" from showing up in the info window.
-        if (location.description === undefined) {
-            description = "";
-        }
 
         // Create a marker for each location
         var marker = new google.maps.Marker({
@@ -201,7 +171,6 @@ var makeMarkers = function() {
             position: position,
             title: title,
             id: location.title,
-            description: description,
             services: services,
             fees: fees,
             icon: "http:\/\/maps.google.com/mapfiles/ms/icons/red-dot.png"
@@ -237,10 +206,6 @@ function populateInfoWindow(marker, infowindow) {
             // Create the CSS class name from the service name. Replace spaces and forward slashes with hyphens.
             var serviceItemClass = serviceItem.replace(/\s|\//g, "-").toLowerCase();
             serviceList = serviceList + "<li class=" + serviceItemClass + ">" + serviceItem + "</li>";
-        }
-
-        if (marker.fees === true) {
-            serviceList = serviceList + "<li class=\"fees-required\">Fees Required</li>";
         }
 
         infowindow.setContent("<div class=\"info-window\"><h3>" + marker.title + "</h3>" + "<p>" + marker.description + "</p><ul class=\"info-window-services\">" + serviceList + "</ul></div>");
