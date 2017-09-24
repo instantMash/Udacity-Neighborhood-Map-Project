@@ -23,7 +23,7 @@ var locations = [{
         services: ["Hiking", "Swimming", "Kayak/Canoe Access", "Fees Required"]
     },
     {
-        title: "La Center",
+        title: "La Center, Washington",
         location: {
             lat: 45.812618,
             lng: -122.546800
@@ -31,7 +31,7 @@ var locations = [{
         services: ["Gas Stations", "Food"]
     },
     {
-        title: "Battle Ground",
+        title: "Battle Ground, Washington",
         location: {
             lat: 45.780700,
             lng: -122.534362
@@ -50,19 +50,22 @@ var categories = [
   "Food"
 ];
 
-// This utility function pushes all the location titles into the visible locations array. We call this at when none of the checkboxes are selected. For some reason, I was not able to simply assign the visibleLocations array to a variable that contained all the location titles. I have to actually push all the location titles each time. I think this has something to do with Knockout and how observable Arrays work.
-function initalLocations(self) {
+// This utility function pushes all the location titles into the visible locations array. We call this when none of the checkboxes are selected.
+function initialLocations(self) {
     locations.forEach(function(location) {
         self.visibleLocations.push(location);
     });
 }
 
-var map;
-var markers = [];
+var map = document.getElementById("map");
 
+var infowindow,
+    markers = [];
+
+// This function creates the map. When the Google Maps API is ready, it calls this function which is specified using the callback parameter.
 function initMap() {
     // Make Map
-    map = new google.maps.Map(document.getElementById("map"), {
+    map = new google.maps.Map(map), {
         styles: [{
             "featureType": "landscape",
             "stylers": [{
@@ -134,7 +137,9 @@ function initMap() {
             style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
             position: google.maps.ControlPosition.TOP_CENTER
         }
-    });
+    };
+
+    infowindow = new google.maps.InfoWindow();
 
     // Set Bounds
     var swBounds = new google.maps.LatLng(45.822883, -122.719666);
@@ -144,11 +149,8 @@ function initMap() {
     bounds.extend(neBounds);
     map.fitBounds(bounds);
 
-
+    makeMarkers();
 } // end initMap
-
-initMap();
-var infowindow = new google.maps.InfoWindow();
 
 var makeMarkers = function() {
 
@@ -162,8 +164,14 @@ var makeMarkers = function() {
     vm.visibleLocations().forEach(function(location) {
         var title = location.title;
         var position = location.location;
+        var description = location.description;
         var services = location.services;
         var fees = location.fees;
+
+        // If the description is blank, set it to an empty string. This prevents "undefined" from showing up in the info window.
+        if (location.description === undefined) {
+            description = "";
+        }
 
         // Create a marker for each location
         var marker = new google.maps.Marker({
@@ -171,10 +179,13 @@ var makeMarkers = function() {
             position: position,
             title: title,
             id: location.title,
+            description: description,
             services: services,
             fees: fees,
             icon: "http:\/\/maps.google.com/mapfiles/ms/icons/red-dot.png"
         });
+
+        location.marker = marker;
 
         markers.push(marker);
 
@@ -208,6 +219,10 @@ function populateInfoWindow(marker, infowindow) {
             serviceList = serviceList + "<li class=" + serviceItemClass + ">" + serviceItem + "</li>";
         }
 
+        if (marker.fees === true) {
+            serviceList = serviceList + "<li class=\"fees-required\">Fees Required</li>";
+        }
+
         infowindow.setContent("<div class=\"info-window\"><h3>" + marker.title + "</h3>" + "<p>" + marker.description + "</p><ul class=\"info-window-services\">" + serviceList + "</ul></div>");
         infowindow.open(map, marker);
 
@@ -225,18 +240,33 @@ var highlightMarker = function(data, event, index) {
 };
 
 
+// Fallback error handling method if Google Maps API does't load
+function mapError() {
+
+  // Create a paragraph to hold the error message.
+  var mapErrorParagraph = document.createElement("p");
+
+  // Create a text node and add it to the paragraph
+  var mapErrorTextNode = document.createTextNode("There was an error loading Google Maps. Please try again later.");
+  mapErrorParagraph.appendChild(mapErrorTextNode);
+
+  // Add a class to the paragraph for styling
+  mapErrorParagraph.className = "map-load-error";
+
+  map.appendChild(mapErrorParagraph);
+
+}
+
 
 var AppViewModel = function() {
     var self = this;
-
-    this.riverFlowMessage = ko.observable();
 
     this.selectedCategories = ko.observableArray();
 
     this.visibleLocations = ko.observableArray();
 
     // If no boxes are checked, show all the locations
-    initalLocations(this);
+    initialLocations(this);
 
     // Filter visible locations based on which checkboxes are selected.
     this.filterLocations = function() {
@@ -246,26 +276,33 @@ var AppViewModel = function() {
 
         // Loop through each location
         locations.forEach(function(location) {
+
+            if (self.selectedCategories().length === 0) {
+                locations.forEach(function(location) {
+                    location.marker.setVisible(true);
+                });
+            }
             // Loop through the the services array of each location. I had to use a regular loop, instead of a forEach loop, so I could use the break statment
             for (i = 0; i < location.services.length; i++) {
                 // If the service name (from the location) is present in the selectedCategories array, add that location title to the visibleLocations array.
                 if (self.selectedCategories().indexOf(location.services[i]) !== -1) {
                     self.visibleLocations.push(location);
+                    location.marker.setVisible(true);
                     // Break out of the loop if a match is found. That way locations can't get added multiple times to the visibleLocations array.
                     break;
+                } else {
+                    location.marker.setVisible(false);
                 }
             } // close the for loop
         }); // close the forEach loop
 
         // If no boxes are checked, show all the locations
         if (self.visibleLocations().length === 0) {
-            initalLocations(self);
+            initialLocations(self);
         }
 
         // By default, the click binding prevents the default reaction to a click based on the assumption that the JavaScript click event handler will handle everything. We need to return "true" to get the default behavior anyway:
         // https://stackoverflow.com/questions/26355096/checkbox-not-getting-checked-in-knockoutjs
-
-        makeMarkers();
 
         return true;
     };
@@ -274,38 +311,24 @@ var AppViewModel = function() {
 }; // end of AppViewModel
 
 
-// Make a call to the USGS River Data API. Get the current flow from the East Fork Lewis guage.
-// USGS Instantaneous Values Web Service
-var usgsURL = "https:\/\/waterservices.usgs.gov/nwis/iv/?format=json&indent=on&sites=14222500&parameterCd=00060&siteStatus=all";
 
-var riverFlowMessage;
 
-$.getJSON(usgsURL, function(data) {
+// Ajax call to Wikipedia API
 
-        var currentRiverFlow = (data.value.timeSeries[0].values[0].value[0].value);
-        var riverFlowCredits = "River level data provided by  <a href=\"https:\/\/waterdata.usgs.gov/nwis/rt\">waterdata.usgs.gov</a>";
+var wikipediaURL = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=La%20Center,%20Washington";
+var wikiData = {};
+$.ajax({
+  url: wikipediaURL,
+  dataType: "jsonp",
+  success: function(data){
+    wikiData = data;
 
-        var riverFlowStatus = "low";
+  },
+  error: function(){
+    console.log("you can't always get what you want.");
+  }
 
-        if (currentRiverFlow > 700) {
-            riverFlowStatus = "medium";
-        }
-
-        if (currentRiverFlow > 1999) {
-            riverFlowStatus = "high";
-        }
-
-        vm.riverFlowMessage("<h3>Current Flow: " + currentRiverFlow + " cfs" + " &bull; <span>" + riverFlowStatus + "</span></h3>" + riverFlowCredits);
-
-    })
-
-    .fail(function() {
-
-        vm.riverFlowMessage("Check out the latest river flow <a href=\"https:\/\/waterdata.usgs.gov\/wa\/nwis\/uv\/?site_no=14222500&PARAmeter_cd=00060,00065\">here</a>");
-
-    });
-
+});
 
 var vm = new AppViewModel();
 ko.applyBindings(vm);
-makeMarkers();
