@@ -59,8 +59,7 @@ function initialLocations(self) {
 
 var map = document.getElementById("map");
 
-var infowindow,
-    markers = [];
+var markers = [], testVariable;
 
 // This function creates the map. When the Google Maps API is ready, it calls this function which is specified using the callback parameter.
 function initMap() {
@@ -154,24 +153,9 @@ function initMap() {
 
 var makeMarkers = function() {
 
-    // Remove any existing markers
-    markers.forEach(function(marker) {
-        marker.setMap(null); // This removes it from the map, but doesn't delete the marker
-    });
-
-    markers.length = 0; // This actually deletes the old markers: https://developers.google.com/maps/documentation/javascript/markers#remove
-
     vm.visibleLocations().forEach(function(location) {
-        var title = location.title;
         var position = location.location;
-        var description = location.description;
-        var services = location.services;
-        var fees = location.fees;
-
-        // If the description is blank, set it to an empty string. This prevents "undefined" from showing up in the info window.
-        if (location.description === undefined) {
-            description = "";
-        }
+        var title = location.title;
 
         // Create a marker for each location
         var marker = new google.maps.Marker({
@@ -179,9 +163,6 @@ var makeMarkers = function() {
             position: position,
             title: title,
             id: location.title,
-            description: description,
-            services: services,
-            fees: fees,
             icon: "http:\/\/maps.google.com/mapfiles/ms/icons/red-dot.png"
         });
 
@@ -195,6 +176,7 @@ var makeMarkers = function() {
                 marker.setIcon("http:\/\/maps.google.com/mapfiles/ms/icons/red-dot.png");
             });
             this.setIcon("http:\/\/maps.google.com/mapfiles/ms/icons/blue-dot.png");
+            wikiCall(marker.title);
             populateInfoWindow(this, infowindow);
         });
 
@@ -204,26 +186,12 @@ var makeMarkers = function() {
 
 function populateInfoWindow(marker, infowindow) {
 
+
     // Check to make sure the infowindow is not already opened on this marker.
     if (infowindow.marker != marker) {
         infowindow.marker = marker;
 
-
-        // Add items from the service array to an HTML list.
-        var serviceList = "";
-        for (i = 0; i < marker.services.length; i++) {
-            var serviceItem = marker.services[i];
-
-            // Create the CSS class name from the service name. Replace spaces and forward slashes with hyphens.
-            var serviceItemClass = serviceItem.replace(/\s|\//g, "-").toLowerCase();
-            serviceList = serviceList + "<li class=" + serviceItemClass + ">" + serviceItem + "</li>";
-        }
-
-        if (marker.fees === true) {
-            serviceList = serviceList + "<li class=\"fees-required\">Fees Required</li>";
-        }
-
-        infowindow.setContent("<div class=\"info-window\"><h3>" + marker.title + "</h3>" + "<p>" + marker.description + "</p><ul class=\"info-window-services\">" + serviceList + "</ul></div>");
+        infowindow.setContent("<div class=\"info-window\"><h3>" + marker.title + "</h3>");
         infowindow.open(map, marker);
 
         // Make sure the marker property is cleared if the infowindow is closed.
@@ -315,20 +283,31 @@ var AppViewModel = function() {
 
 // Ajax call to Wikipedia API
 
-var wikipediaURL = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=La%20Center,%20Washington";
-var wikiData = {};
-$.ajax({
-  url: wikipediaURL,
-  dataType: "jsonp",
-  success: function(data){
-    wikiData = data;
+var infowindowContent;
 
-  },
-  error: function(){
-    console.log("you can't always get what you want.");
-  }
+function wikiCall (markerTitle){
 
-});
+  var wikipediaURL = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=" + markerTitle;
+
+
+  $.ajax({
+    url: wikipediaURL,
+    dataType: "jsonp",
+    success: function(data){
+
+      infowindowContent = data;
+
+    },
+
+    error: function(){
+      infowindowContent = "Sorry. Wikipedia content isn't loading right now."  ;
+    }
+
+  });
+
+
+}; // end of WikiCall function
+
 
 var vm = new AppViewModel();
 ko.applyBindings(vm);
