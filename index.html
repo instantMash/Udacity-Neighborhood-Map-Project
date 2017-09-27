@@ -40,7 +40,7 @@
 
     <!-- list of locations -->
     <ul data-bind="foreach: visibleLocations">
-        <li data-bind="text: $data.title, click: function(data, event) { highlightMarker(data, event, $index()) }"></li>
+        <li data-bind="text: $data.title, click: highlightMarker"></li>
     </ul>
 
     <div id="map"></div>

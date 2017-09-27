@@ -26,7 +26,7 @@ I utilized two third-party APIs that are retrieved in an asynchronous manner.
 * __Google Maps Javascript API__ creates the map, markers, and marker pop up windows.
 * __Wikipedia API__ supplies information about each location in the Info Window.
 
-## Revisions after Code Review
+## Revisions after Code Review #1
 
 > Please see Location Details Functionality rubric. Location details must contain unique information from a non-Google API service.
 
@@ -47,3 +47,9 @@ I reordered the script tag, added the async attribute, and provided a fallback e
 > Please specifically give detailed instruction on how to set up the local web server.
 
 Now that I am not using the USGS API, a local server is not required. So I left this out.
+
+## Revisions after Code Review #2
+
+> After filtering, clicking on location list won't always trigger the correct marker.
+
+I fixed this bug by finding the associated marker in the data object and using that to trigger the marker.

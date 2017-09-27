@@ -166,6 +166,7 @@ var makeMarkers = function() {
             icon: "http:\/\/maps.google.com/mapfiles/ms/icons/red-dot.png"
         });
 
+        // Add the marker as a prpertiy of the location object. That way we can do stuff later, such as associate the list of visible locations with their corresponding markers.
         location.marker = marker;
 
         markers.push(marker);
@@ -204,8 +205,8 @@ function populateInfoWindow(marker, infowindow) {
 
 
 // Trigger the markers when their corresponding list item is clicked
-var highlightMarker = function(data, event, index) {
-    google.maps.event.trigger(markers[index], "click");
+var highlightMarker = function(data, event) {
+    google.maps.event.trigger(data.marker, "click");
 };
 
 
