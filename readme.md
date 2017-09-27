@@ -25,4 +25,26 @@ I used Knockout.js to implement a Model-View-View Model (MVVM) design pattern.
 I utilized two third-party APIs that are retrieved in an asynchronous manner.
 
 * __Google Maps Javascript API__ creates the map, markers, and marker pop up windows.
-* __USGS Instantaneous Values Web Service__ supplies the current flow from monitoring stations along the river. I used jQuery for handling the this AJAX request and the success/fail functions.
+* __Wikipedia API__ supplies information about each location in the Info Window.
+
+## Revisions after Code Review
+
+> Please see Location Details Functionality rubric. Location details must contain unique information from a non-Google API service.
+
+...
+
+> Current river level data is not specific for each location and does not count to meet the project requirement of: Providing unique location detail from a non-Google API service for each location. The current unique details on infowindow are also hard-coded instead of being retrieved from a 3rd party API service. The location details must be unique for each location and should be shown when the location item/marker is clicked.
+
+I am now using the Wikipedia API to add unique location detail for each location.
+
+> Google Map API should be loaded asynchronously.Please re-order script tag to avoid race condition issue as Map is requested asynchronously. Map API must be the last requested script.
+
+...
+
+> Google Map API request needs to be provided with an error handling method
+
+I reordered the script tag, added the async attribute, and provided a fallback error handling method using the onerror attribute.
+
+> Please specifically give detailed instruction on how to set up the local web server.
+
+Now that I am not using the USGS API, a local server is not required. So I left this out.

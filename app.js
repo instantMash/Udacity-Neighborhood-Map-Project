@@ -41,13 +41,13 @@ var locations = [{
 ];
 
 var categories = [
-  "Hiking",
-  "Boat Ramp",
-  "Fees Required",
-  "Swimming",
-  "Kayak/Canoe Access",
-  "Gas Stations",
-  "Food"
+    "Hiking",
+    "Boat Ramp",
+    "Fees Required",
+    "Swimming",
+    "Kayak/Canoe Access",
+    "Gas Stations",
+    "Food"
 ];
 
 // This utility function pushes all the location titles into the visible locations array. We call this when none of the checkboxes are selected.
@@ -59,7 +59,7 @@ function initialLocations(self) {
 
 var map = document.getElementById("map");
 
-var markers = [], testVariable;
+var markers = [];
 
 // This function creates the map. When the Google Maps API is ready, it calls this function which is specified using the callback parameter.
 function initMap() {
@@ -176,8 +176,9 @@ var makeMarkers = function() {
                 marker.setIcon("http:\/\/maps.google.com/mapfiles/ms/icons/red-dot.png");
             });
             this.setIcon("http:\/\/maps.google.com/mapfiles/ms/icons/blue-dot.png");
-            wikiCall(marker.title);
-            populateInfoWindow(this, infowindow);
+            var currentMarker = this; // Store 'this' as a variable so we can pass it to the wikiCall function.
+            var markerTitle = marker.title;
+            wikiCall(currentMarker, markerTitle);
         });
 
     });
@@ -191,7 +192,7 @@ function populateInfoWindow(marker, infowindow) {
     if (infowindow.marker != marker) {
         infowindow.marker = marker;
 
-        infowindow.setContent("<div class=\"info-window\"><h3>" + marker.title + "</h3>");
+        infowindow.setContent(infowindowContent);
         infowindow.open(map, marker);
 
         // Make sure the marker property is cleared if the infowindow is closed.
@@ -211,17 +212,17 @@ var highlightMarker = function(data, event, index) {
 // Fallback error handling method if Google Maps API does't load
 function mapError() {
 
-  // Create a paragraph to hold the error message.
-  var mapErrorParagraph = document.createElement("p");
+    // Create a paragraph to hold the error message.
+    var mapErrorParagraph = document.createElement("p");
 
-  // Create a text node and add it to the paragraph
-  var mapErrorTextNode = document.createTextNode("There was an error loading Google Maps. Please try again later.");
-  mapErrorParagraph.appendChild(mapErrorTextNode);
+    // Create a text node and add it to the paragraph
+    var mapErrorTextNode = document.createTextNode("There was an error loading Google Maps. Please try again later.");
+    mapErrorParagraph.appendChild(mapErrorTextNode);
 
-  // Add a class to the paragraph for styling
-  mapErrorParagraph.className = "map-load-error";
+    // Add a class to the paragraph for styling
+    mapErrorParagraph.className = "map-load-error";
 
-  map.appendChild(mapErrorParagraph);
+    map.appendChild(mapErrorParagraph);
 
 }
 
@@ -281,32 +282,61 @@ var AppViewModel = function() {
 
 
 
+
+var wikiPageTitle,
+    wikiPageExtract,
+    wikiPageURL,
+    wikiAttribution,
+    infowindowContent;
+
+
+
 // Ajax call to Wikipedia API
 
-var infowindowContent;
+function wikiCall(currentMarker, markerTitle) {
 
-function wikiCall (markerTitle){
+    // This creates the URL to request the Wikipedia excerpt.
+    var wikipediaAPI = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=" + markerTitle;
 
-  var wikipediaURL = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=" + markerTitle;
+    // This creates the URL to the actual Wikipedia article.
+    wikiPageURL = "https://en.wikipedia.org/wiki/" + markerTitle;
 
-
-  $.ajax({
-    url: wikipediaURL,
-    dataType: "jsonp",
-    success: function(data){
-
-      infowindowContent = data;
-
-    },
-
-    error: function(){
-      infowindowContent = "Sorry. Wikipedia content isn't loading right now."  ;
-    }
-
-  });
+    // This snippet will go into the infowindow.
+     wikiAttribution = "<p><em>Provided by Wikipedia. Read the full article <a href=\"" + wikiPageURL + "\" target=\"_blank\">here</a></em></p>";
 
 
-}; // end of WikiCall function
+    $.ajax({
+        url: wikipediaAPI,
+        dataType: "jsonp",
+        success: function(data) {
+
+
+
+            // We need to find out the Wikipedia page id
+            wikiQueryId = Object.keys(data.query.pages)[0];
+
+            // Now that we know the page id, we can get deeper into the json object
+            wikiPageTitle = data.query.pages[wikiQueryId].title;
+            wikiPageExtract = data.query.pages[wikiQueryId].extract;
+
+            infowindowContent = "<h3>" + wikiPageTitle + "</h3>" + "<p>" + wikiPageExtract + "</p>" + wikiAttribution;
+
+
+            populateInfoWindow(currentMarker, infowindow);
+
+
+        },
+
+        error: function() {
+            infowindowContent = "Sorry. Wikipedia content isn't loading right now.";
+            populateInfoWindow(currentMarker, infowindow);
+
+        }
+
+    });
+
+
+} // end of WikiCall function
 
 
 var vm = new AppViewModel();
