@@ -4,8 +4,7 @@ This website was created for my Udacity Front End Nanodegree Neighborhood Map Pr
 ## How to view this Project
 * Download or clone this repo.
 * Open index.html in a browser.
-* You will need an Internet connection to view the Google map and USGS data.
-* __Note__: To successfully load the USGS API, you will need to run index.html on a web server.
+* You will need an Internet connection to view the Google map and Wikipedia data.
 * You can also view this site on GitHub pages [here.](http://gregdavenportdesign.com/Explore-the-East-Fork-Lewis/)
 
 ## Location Filtering
